@@ -80,8 +80,8 @@ public class MainOpMode_Linear extends LinearOpMode {
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
         backright.setDirection(DcMotor.Direction.REVERSE);
-        frontright.setDirection(DcMotor.Direction.REVERSE);
-        frontleft.setDirection(DcMotor.Direction.FORWARD);
+        frontright.setDirection(DcMotor.Direction.FORWARD);
+        frontleft.setDirection(DcMotor.Direction.REVERSE);
         backleft.setDirection(DcMotor.Direction.FORWARD);
 
 
@@ -111,6 +111,9 @@ public class MainOpMode_Linear extends LinearOpMode {
             backright.setPower(backrightpower);
             frontright.setPower(frontrightpower);
             frontleft.setPower(frontleftpower);
+
+            // Code for mechanism to go
+
 
             // Show the elapsed game time and wheel power, also arm position.
             telemetry.addData("Motor position", String.valueOf(frontleft.getCurrentPosition()), frontright.getCurrentPosition(), backleft.getCurrentPosition(), backright.getCurrentPosition());
