@@ -61,6 +61,9 @@ public class MainOpMode_Linear extends LinearOpMode {
     private DcMotor backright = null;
     private DcMotor frontright = null;
     private DcMotor frontleft = null;
+    private DcMotor leftArm = null;
+    private DcMotor rightArm = null;
+
 
     @Override
     public void runOpMode() {
@@ -75,6 +78,8 @@ public class MainOpMode_Linear extends LinearOpMode {
         backright = hardwareMap.get(DcMotor.class, "BackRightWheel");
         frontleft = hardwareMap.get(DcMotor.class, "FrontLeftWheel");
         frontright = hardwareMap.get(DcMotor.class, "FrontRightWheel");
+        leftArm = hardwareMap.get(DcMotor.class, "LeftArm");
+        rightArm = hardwareMap.get(DcMotor.class, "RightArm");
         //magnet = hardwareMap.get(TouchSensor.class, "Magnet");
 
         // Most robots need the motor on one side to be reversed to drive forward
@@ -83,6 +88,17 @@ public class MainOpMode_Linear extends LinearOpMode {
         frontright.setDirection(DcMotor.Direction.FORWARD);
         frontleft.setDirection(DcMotor.Direction.REVERSE);
         backleft.setDirection(DcMotor.Direction.FORWARD);
+        leftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftArm.setTargetPosition(0);
+        leftArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftArm.setPower(1.0);
+        leftArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightArm.setTargetPosition(0);
+        rightArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightArm.setPower(1.0);
+        rightArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
 
 
         // Wait for the game to start (driver presses PLAY)
