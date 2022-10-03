@@ -82,28 +82,35 @@ public class MainOpMode_Linear extends LinearOpMode {
         rightArm = hardwareMap.get(DcMotor.class, "RightArm");
         //magnet = hardwareMap.get(TouchSensor.class, "Magnet");
 
+        // Robot wheel motor set Up ------------------------------
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
         backright.setDirection(DcMotor.Direction.REVERSE);
         frontright.setDirection(DcMotor.Direction.FORWARD);
         frontleft.setDirection(DcMotor.Direction.REVERSE);
         backleft.setDirection(DcMotor.Direction.FORWARD);
-        leftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftArm.setTargetPosition(0);
-        leftArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftArm.setPower(1.0);
-        leftArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightArm.setTargetPosition(0);
-        rightArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightArm.setPower(1.0);
-        rightArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        // Robot Arm motor set Up ------------------------------
+        leftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftArm.setTargetPosition(0);
+        rightArm.setTargetPosition(0);
+        leftArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftArm.setPower(1.0);
+        rightArm.setPower(1.0);
+        leftArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
+
+        double leftArmPower = 1.0;
+        double rightArmPower = 1.0;
+        int armPosition = 0;
+        int[] armLevel = {0 /*home*/, 145 /*Low*/, 309 /*Medium*/, 445 /*High*/};
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -130,10 +137,30 @@ public class MainOpMode_Linear extends LinearOpMode {
 
             // Code for mechanism to go
 
+            //
+            // arm automation set up goes here
+            if (gamepad1.x) {
+                armPosition = armLevel[0];
+            }
+            else if (gamepad1.a) {
+                armPosition = armLevel[1];
+            }
+            else if (gamepad1.b) {
+                armPosition = armLevel[2];
+            }
+            else if (gamepad1.y) {
+                armPosition = armLevel[3];
+            }
+            leftArm.setTargetPosition(armPosition);
+            rightArm.setTargetPosition(armPosition);
+
 
             // Show the elapsed game time and wheel power, also arm position.
             telemetry.addData("Motor position", String.valueOf(frontleft.getCurrentPosition()), frontright.getCurrentPosition(), backleft.getCurrentPosition(), backright.getCurrentPosition());
             telemetry.addData("Status", "Run Time: " + runtime.toString());
+//            telemetry.addData("Arm Power", "left (%.2f), right (%.2f)", leftArm.getPower(), rightArm.getPower());
+            telemetry.addData("Status", "Left Arm Position: " + leftArm.getCurrentPosition());
+            telemetry.addData("Status", "Right Arm Position: " + rightArm.getCurrentPosition());
             telemetry.addData("Motors", "frontleft (%.2f), frontright (%.2f), backleft (%.2f), backright (%.2f)", frontleftpower, frontrightpower, backleftpower, backrightpower);
             telemetry.update();
         }
