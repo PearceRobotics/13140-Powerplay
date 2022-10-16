@@ -29,11 +29,10 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
 
 
 /**
@@ -49,9 +48,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name = "MainTeleop", group = "Robot code")
+@TeleOp(name = "TestTeleop", group = "Robot code")
 
-public class MainOpMode_Linear extends LinearOpMode {
+public class TestOpMode extends LinearOpMode {
 
     // Declare OpMode members.
     private final ElapsedTime runtime = new ElapsedTime();
@@ -76,9 +75,6 @@ public class MainOpMode_Linear extends LinearOpMode {
         backright = hardwareMap.get(DcMotor.class, "BackRightWheel");
         frontleft = hardwareMap.get(DcMotor.class, "FrontLeftWheel");
         frontright = hardwareMap.get(DcMotor.class, "FrontRightWheel");
-        leftArm = hardwareMap.get(DcMotor.class, "LeftArm");
-        rightArm = hardwareMap.get(DcMotor.class, "RightArm");
-        //magnet = hardwareMap.get(TouchSensor.class, "Magnet");
 
         // Robot wheel motor set Up ------------------------------
         // Most robots need the motor on one side to be reversed to drive forward
@@ -88,30 +84,9 @@ public class MainOpMode_Linear extends LinearOpMode {
         frontleft.setDirection(DcMotor.Direction.REVERSE);
         backleft.setDirection(DcMotor.Direction.FORWARD);
 
-        // Robot Arm motor set Up ------------------------------
-        leftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftArm.setTargetPosition(0);
-        rightArm.setTargetPosition(0);
-
-        //telemetry.addData("Motor Position Left arm and Right arm", "Left Arm: " + leftArm.getCurrentPosition() + " Right Arm: " + rightArm.getCurrentPosition());
-        //This is just for now until we read the encoder values
-        leftArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftArm.setPower(0.5);
-        rightArm.setPower(0.5);
-        leftArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
-
-        double leftArmPower = 1.0;
-        double rightArmPower = 1.0;
-        int armPosition = 0;
-        int[] armLevel = {0 /*home*/, 50 /*Low*/, 63 /*Medium*/, 100 /*High*/};
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -120,44 +95,24 @@ public class MainOpMode_Linear extends LinearOpMode {
 
             // POV Mode uses left stick to go forward, and right stick to turn.
             // - This uses basic math to combine motions and is easier to drive straight
-            double y = -gamepad1.left_stick_y;
-            double x = gamepad1.left_stick_x * 1.1;
-            double rx = gamepad1.right_stick_x;
-
-            double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-            double frontleftpower = (y - x + rx) / denominator;
-            double backleftpower = (y + x + rx) / denominator;
-            double frontrightpower = (y + x - rx) / denominator;
-            double backrightpower = (y - x - rx) / denominator;
+            double r = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
+            double robotAngle = Math.atan2(gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
+            double rightX = gamepad1.right_stick_x;
+            final double v1 = r * Math.cos(robotAngle) + rightX;
+            final double v2 = r * Math.sin(robotAngle) - rightX;
+            final double v3 = r * Math.sin(robotAngle) + rightX;
+            final double v4 = r * Math.cos(robotAngle) - rightX;
 
             // Send calculated power to wheels
-            backleft.setPower(backleftpower);
-            backright.setPower(backrightpower);
-            frontright.setPower(frontrightpower);
-            frontleft.setPower(frontleftpower);
-
-            // Code for mechanism to go
-            // arm automation set up goes here
-            if (gamepad1.x) {
-                armPosition = armLevel[0];
-            } else if (gamepad1.a) {
-                armPosition = armLevel[1];
-            } else if (gamepad1.b) {
-                armPosition = armLevel[2];
-            } else if (gamepad1.y) {
-                armPosition = armLevel[3];
-            }
-            leftArm.setTargetPosition(armPosition);
-            rightArm.setTargetPosition(armPosition);
-
+            backleft.setPower(v3);
+            backright.setPower(v4);
+            frontright.setPower(v2);
+            frontleft.setPower(v1);
 
             // Show the elapsed game time and wheel power, also arm position.
             telemetry.addData("Motor position", String.valueOf(frontleft.getCurrentPosition()), frontright.getCurrentPosition(), backleft.getCurrentPosition(), backright.getCurrentPosition());
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-//            telemetry.addData("Arm Power", "left (%.2f), right (%.2f)", leftArm.getPower(), rightArm.getPower());
-            telemetry.addData("Left arm value", "Left Arm Position: " + leftArm.getCurrentPosition());
-            telemetry.addData("Right arm value", "Right Arm Position: " + rightArm.getCurrentPosition());
-            telemetry.addData("Motors", "frontleft (%.2f), frontright (%.2f), backleft (%.2f), backright (%.2f)", frontleftpower, frontrightpower, backleftpower, backrightpower);
+            telemetry.addData("Motors", "frontleft (%.2f), frontright (%.2f), backleft (%.2f), backright (%.2f)", frontleft.getPower(), frontright.getPower(), backleft.getPower(), backright.getPower());
             telemetry.update();
         }
     }
