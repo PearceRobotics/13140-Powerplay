@@ -124,11 +124,10 @@ import java.util.ArrayList;
         private double clicksPerInch = 44.56; // empirically measured 4x encoding
         private double clicksPerDeg = 9.02; // empirically measured 4x encoding
         private double tol = .1 * clicksPerInch;
-        private double armPower = 1.0;
+        String target; // This is the variable the camera will save the target parking spot to
         int armPosition = 0;
         int[] armLevel = {0, 145, 470};
         //private double 45 = 90 * 9.45 - 570.6
-        String target;
 
         @Override
         public void runOpMode() {
