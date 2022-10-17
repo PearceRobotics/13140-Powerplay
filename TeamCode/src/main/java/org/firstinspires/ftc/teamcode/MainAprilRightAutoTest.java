@@ -38,8 +38,6 @@ import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvInternalCamera;
-import org.openftc.easyopencv.OpenCvInternalCamera2;
 
 import java.util.ArrayList;
 
@@ -72,9 +70,9 @@ import java.util.ArrayList;
 
 
 
-    @Autonomous(name="FullV2AutonBlue", group="Linear Opmode")  // @TeleOp(...) is the other common choice
+    @Autonomous(name="Right Auto", group="Linear Opmode")  // @TeleOp(...) is the other common choice
 // @Disabled
-    public class MainAprilBlueAutoTest extends LinearOpMode {
+    public class MainAprilRightAutoTest extends LinearOpMode {
 
         // April Tags decleration
         OpenCvCamera camera;
@@ -209,82 +207,72 @@ import java.util.ArrayList;
             telemetry.setMsTransmissionInterval(50);
 
             // April Tags initialization
-            while (opModeIsActive())
-            {
-                // Calling getDetectionsUpdate() will only return an object if there was a new frame
-                // processed since the last time we called it. Otherwise, it will return null. This
-                // enables us to only run logic when there has been a new frame, as opposed to the
-                // getLatestDetections() method which will always return an object.
-                ArrayList<AprilTagDetection> detections = aprilTagDetectionPipeline.getDetectionsUpdate();
+            if (opModeIsActive()) {
+                while (opModeIsActive()) {
+                    // Calling getDetectionsUpdate() will only return an object if there was a new frame
+                    // processed since the last time we called it. Otherwise, it will return null. This
+                    // enables us to only run logic when there has been a new frame, as opposed to the
+                    // getLatestDetections() method which will always return an object.
+                    ArrayList<AprilTagDetection> detections = aprilTagDetectionPipeline.getDetectionsUpdate();
 
-                //
-                if(detections != null)
-                {
-                    telemetry.addData("FPS", camera.getFps());
-                    telemetry.addData("Overhead ms", camera.getOverheadTimeMs());
-                    telemetry.addData("Pipeline ms", camera.getPipelineTimeMs());
-                    telemetry.addData("Tag Count", detections.size());
+                    //
+                    if (detections != null) {
+                        telemetry.addData("FPS", camera.getFps());
+                        telemetry.addData("Overhead ms", camera.getOverheadTimeMs());
+                        telemetry.addData("Pipeline ms", camera.getPipelineTimeMs());
+                        telemetry.addData("Tag Count", detections.size());
 
-                    // If we don't see any tags
-                    if(detections.size() == 0)
-                    {
-                        numFramesWithoutDetection++;
+                        // If we don't see any tags
+                        if (detections.size() == 0) {
+                            numFramesWithoutDetection++;
 
-                        // If we haven't seen a tag for a few frames, lower the decimation
-                        // so we can hopefully pick one up if we're e.g. far back
-                        if(numFramesWithoutDetection >= THRESHOLD_NUM_FRAMES_NO_DETECTION_BEFORE_LOW_DECIMATION)
-                        {
-                            aprilTagDetectionPipeline.setDecimation(DECIMATION_LOW);
+                            // If we haven't seen a tag for a few frames, lower the decimation
+                            // so we can hopefully pick one up if we're e.g. far back
+                            if (numFramesWithoutDetection >= THRESHOLD_NUM_FRAMES_NO_DETECTION_BEFORE_LOW_DECIMATION) {
+                                aprilTagDetectionPipeline.setDecimation(DECIMATION_LOW);
+                            }
                         }
-                    }
-                    // We do see tags!
-                    else
-                    {
-                        numFramesWithoutDetection = 0;
+                        // We do see tags!
+                        else {
+                            numFramesWithoutDetection = 0;
 
-                        // If the target is within 1 meter, turn on high decimation to
-                        // increase the frame rate
-                        if(detections.get(0).pose.z < THRESHOLD_HIGH_DECIMATION_RANGE_METERS)
-                        {
-                            aprilTagDetectionPipeline.setDecimation(DECIMATION_HIGH);
-                        }
+                            // If the target is within 1 meter, turn on high decimation to
+                            // increase the frame rate
+                            if (detections.get(0).pose.z < THRESHOLD_HIGH_DECIMATION_RANGE_METERS) {
+                                aprilTagDetectionPipeline.setDecimation(DECIMATION_HIGH);
+                            }
 
-                        for(AprilTagDetection detection : detections)
-                        {
-                            telemetry.addLine(String.format("\nDetected tag ID=%d", detection.id));
-                            telemetry.addLine(String.format("Translation X: %.2f feet", detection.pose.x*FEET_PER_METER));
-                            telemetry.addLine(String.format("Translation Y: %.2f feet", detection.pose.y*FEET_PER_METER));
-                            telemetry.addLine(String.format("Translation Z: %.2f feet", detection.pose.z*FEET_PER_METER));
-                            telemetry.addLine(String.format("Rotation Yaw: %.2f degrees", Math.toDegrees(detection.pose.yaw)));
-                            telemetry.addLine(String.format("Rotation Pitch: %.2f degrees", Math.toDegrees(detection.pose.pitch)));
-                            telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(detection.pose.roll)));
+                            for (AprilTagDetection detection : detections) {
+                                telemetry.addLine(String.format("\nDetected tag ID=%d", detection.id));
+                                telemetry.addLine(String.format("Translation X: %.2f feet", detection.pose.x * FEET_PER_METER));
+                                telemetry.addLine(String.format("Translation Y: %.2f feet", detection.pose.y * FEET_PER_METER));
+                                telemetry.addLine(String.format("Translation Z: %.2f feet", detection.pose.z * FEET_PER_METER));
+                                telemetry.addLine(String.format("Rotation Yaw: %.2f degrees", Math.toDegrees(detection.pose.yaw)));
+                                telemetry.addLine(String.format("Rotation Pitch: %.2f degrees", Math.toDegrees(detection.pose.pitch)));
+                                telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(detection.pose.roll)));
+                            }
+
                         }
 
+                        telemetry.update();
+
+                        if (detections.get(0).id == 1) {
+                            telemetry.addLine("Target is Left Parking");
+                            target = "left";
+                            break;
+                        } else if (detections.get(0).id == 2) {
+                            telemetry.addLine("Target is Middle Parking");
+                            target = "middle";
+                            break;
+                        } else {
+                            telemetry.addLine("Target is Right Parking");
+                            target = "right";
+                            break;
+                        }
                     }
 
-                    telemetry.update();
-
-                    if (detections.get(0).id == 1)
-                    {
-                        telemetry.addLine("Target is Left Parking");
-                        target = "left";
-                        break;
-                    }
-                    else if (detections.get(0).id == 2)
-                    {
-                        telemetry.addLine("Target is Middle Parking");
-                        target = "middle";
-                        break;
-                    }
-                    else
-                    {
-                        telemetry.addLine("Target is Right Parking");
-                        target = "right";
-                        break;
-                    }
+                    sleep(20);
                 }
-
-                sleep(20);
             }
 
 
@@ -295,16 +283,16 @@ import java.util.ArrayList;
 
             //Move the robot forward to top line of starting box
             moveForward(20 /*Distance Needs to be re-calculated*/, 1.0);
-            //Turn robot 45 right
-            turnClockwise(45, 0.75);
+            //Turn robot 45 left
+            turnClockwise(-45, 0.75);
             //Move robot forward to the right side of the cone
             moveForward(20 /*Distance Needs to be re-calculated*/, 1.0);
-            //Turn robot 90 left
-            turnClockwise(-45, 0.75);
+            //Turn robot 90 right
+            turnClockwise(45, 0.75);
             //Move robot forward to the top of the cone
             moveForward(20 /*Distance Needs to be re-calculated*/, 1.0);
             //Turn robot +/-90 towards the high goal
-            turnClockwise(90, 0.75);
+            turnClockwise(-90, 0.75);
             //Move robot forward to the high goal
             moveForward(20 /*Distance Needs to be re-calculated*/, 1.0);
             if  (frontleft.isBusy())
@@ -320,7 +308,7 @@ import java.util.ArrayList;
                 //Move robot backwards from the high goal
                moveForward(-20 /*Distance Needs to be re-calculated*/, 1.0);
                //Turn robot facing the left field wall
-               turnClockwise(135, 0.75);
+               turnClockwise(45, 0.75);
                //Move robot forward towards left field wall
                moveForward(20 /*Distance Needs to be re-calculated*/, 1.0);
                //Turn robot towards the left parking
@@ -346,7 +334,7 @@ import java.util.ArrayList;
                 //Move robot backwards from the high goal
                 moveForward(-20 /*Distance Needs to be re-calculated*/, 1.0);
                 //Turn robot facing the right field wall
-                turnClockwise(45, 0.75);
+                turnClockwise(135, 0.75);
                 //Move robot forward towards right field wall
                 moveForward(20 /*Distance Needs to be re-calculated*/, 1.0);
                 //Turn robot towards the right parking
