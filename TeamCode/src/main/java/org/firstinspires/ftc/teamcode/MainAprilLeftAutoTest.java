@@ -110,7 +110,7 @@ import java.util.ArrayList;
         DcMotor backright = null;
         DcMotor rightArm = null;
         DcMotor leftArm = null;
-        DcMotor intake = null;
+        //DcMotor intake = null;
 
 
 
@@ -124,7 +124,10 @@ import java.util.ArrayList;
         private double clicksPerInch = 44.56; // empirically measured 4x encoding
         private double clicksPerDeg = 9.02; // empirically measured 4x encoding
         private double tol = .1 * clicksPerInch;
+        // 8.25 inches is wheels relative to center of robot
+        // 8.13 inches is wheels relative to center of robot
         String target; // This is the variable the camera will save the target parking spot to
+    public AprilTagDemo aprilTagDemo;
         int armPosition = 0;
         int[] armLevel = {0, 145, 470};
         //private double 45 = 90 * 9.45 - 570.6
@@ -162,15 +165,15 @@ import java.util.ArrayList;
             backright = hardwareMap.get(DcMotor.class, "BackRightWheel");
             frontleft = hardwareMap.get(DcMotor.class, "FrontLeftWheel");
             frontright = hardwareMap.get(DcMotor.class, "FrontRightWheel");
-            intake = hardwareMap.get(DcMotor.class, "Intake");
+            //intake = hardwareMap.get(DcMotor.class, "Intake");
             leftArm = hardwareMap.get(DcMotor.class, "LeftArm");
             rightArm = hardwareMap.get(DcMotor.class, "RightArm");
 
 
             // The right motors need reversing
-            frontright.setDirection(DcMotor.Direction.REVERSE);
-            frontleft.setDirection(DcMotor.Direction.FORWARD);
             backright.setDirection(DcMotor.Direction.REVERSE);
+            frontright.setDirection(DcMotor.Direction.FORWARD);
+            frontleft.setDirection(DcMotor.Direction.REVERSE);
             backleft.setDirection(DcMotor.Direction.FORWARD);
 
             // Set the drive motor run modes:
@@ -180,7 +183,7 @@ import java.util.ArrayList;
             backright.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             leftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            //intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
             frontright.setTargetPosition(0);
             frontleft.setTargetPosition(0);
@@ -188,7 +191,7 @@ import java.util.ArrayList;
             backright.setTargetPosition(0);
             leftArm.setTargetPosition(0);
             rightArm.setTargetPosition(0);
-            intake.setTargetPosition(0);
+            //intake.setTargetPosition(0);
 
             frontleft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             frontright.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -196,7 +199,7 @@ import java.util.ArrayList;
             backright.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             leftArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            intake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            //intake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             leftArm.setPower(1.0);
             rightArm.setPower(1.0);
             leftArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -257,11 +260,11 @@ import java.util.ArrayList;
 
                         telemetry.update();
 
-                        if (detections.get(0).id == 1) {
+                        if (detections.get(0).id == 2) {
                             telemetry.addLine("Target is Left Parking");
                             target = "left";
                             break;
-                        } else if (detections.get(0).id == 2) {
+                        } else if (detections.get(0).id == 0) {
                             telemetry.addLine("Target is Middle Parking");
                             target = "middle";
                             break;
@@ -280,70 +283,75 @@ import java.util.ArrayList;
 
             // *****************Dead reckoning list*************
             // Distances in inches, angles in deg, speed 0.0 to 0.6
-            //All moveforwards with number 5 need to be calculated still
-
+            //All moveforwards with number 5 need to be calculated stil
             //Move the robot forward to top line of starting box
-            moveForward(20 /*Distance Needs to be re-calculated*/, 1.0);
+            moveForward(7 /*Distance Needs to be re-calculated*/, 1.0);
             //Turn robot 45 right
-            turnClockwise(45, 0.75);
+            turnClockwise(95 , 0.5);
             //Move robot forward to the right side of the cone
-            moveForward(20 /*Distance Needs to be re-calculated*/, 1.0);
+            moveForward(25 /*Distance Needs to be re-calculated*/, 1.0);
             //Turn robot 90 left
-            turnClockwise(-45, 0.75);
+            turnClockwise(-99, 0.5);
             //Move robot forward to the top of the cone
-            moveForward(20 /*Distance Needs to be re-calculated*/, 1.0);
+            moveForward(50 /*Distance Needs to be re-calculated*/, 1.0);
             //Turn robot +/-90 towards the high goal
-            turnClockwise(90, 0.75);
+            turnClockwise(-39, 0.5);
             //Move robot forward to the high goal
-            moveForward(20 /*Distance Needs to be re-calculated*/, 1.0);
-            if  (frontleft.isBusy())
+            moveForward(10 /*Distance Needs to be re-calculated*/, 1.0);
+
+            /*if  (frontleft.isBusy())
             {
                 leftArm.setTargetPosition(armLevel[3]);
                 rightArm.setTargetPosition(armLevel[3]);
             }
             //Outtake the cone
             intakePosition(20, 1.0);
-
+*/
             if (target == "left")
             {
                 //Move robot backwards from the high goal
-               moveForward(-20 /*Distance Needs to be re-calculated*/, 1.0);
+               moveForward(-9, 1.0);
                //Turn robot facing the left field wall
-               turnClockwise(135, 0.75);
+                turnClockwise(-76, 0.5);
                //Move robot forward towards left field wall
-               moveForward(20 /*Distance Needs to be re-calculated*/, 1.0);
+               moveForward(47, 1.0);
                //Turn robot towards the left parking
-               turnClockwise(90, 0.75);
+               turnClockwise(-94, 0.5);
                //Move towards the left parking
-               moveForward(20 /*Distance Needs to be re-calculated*/, 1.0);
-               leftArm.setTargetPosition(armLevel[0]);
-               rightArm.setTargetPosition(armLevel[0]);
+               moveForward(23, 1.0);
+               //leftArm.setTargetPosition(armLevel[0]);
+               //rightArm.setTargetPosition(armLevel[0]);
             }
-            else if (target == "middle")
+
+            if (target == "middle")
             {
                 //Move robot backwards from the high goal
-                moveForward(-20 /*Distance Needs to be re-calculated*/, 1.0);
+                moveForward(-7 , 1.0);
                 //Turn robot facing the cone
-                turnClockwise(135, 0.75);
+                turnClockwise(-90, 0.75);
                 //Move robot forward towards the middle parking
-                moveForward(20 /*Distance Needs to be re-calculated*/, 1.0);
-                leftArm.setTargetPosition(armLevel[0]);
-                rightArm.setTargetPosition(armLevel[0]);
+                moveForward(20, 1.0);
+                //Turn robot towards the middle parking
+                turnClockwise(-95, 0.75);
+                //Move towards the middle parking
+                moveForward(24, 1.0);
+                //leftArm.setTargetPosition(armLevel[0]);
+                //rightArm.setTargetPosition(armLevel[0]);
             }
-            else
+                if (target == "right")
             {
                 //Move robot backwards from the high goal
-                moveForward(-20 /*Distance Needs to be re-calculated*/, 1.0);
+                moveForward(-14, 1.0);
                 //Turn robot facing the right field wall
-                turnClockwise(45, 0.75);
+                turnClockwise(37, 0.75);
                 //Move robot forward towards right field wall
-                moveForward(20 /*Distance Needs to be re-calculated*/, 1.0);
+                moveForward(-23, 1.0);
                 //Turn robot towards the right parking
-                turnClockwise(90, 0.75);
+                //turnClockwise(90, 0.75);
                 //Move towards the right parking
-                moveForward(20 /*Distance Needs to be re-calculated*/, 1.0);
-                leftArm.setTargetPosition(armLevel[0]);
-                rightArm.setTargetPosition(armLevel[0]);
+                //moveForward(20 /*Distance Needs to be re-calculated*, 1.0);
+                //leftArm.setTargetPosition(armLevel[0]);
+                //rightArm.setTargetPosition(armLevel[0]);
             }
 
 
@@ -452,7 +460,7 @@ import java.util.ArrayList;
             backright.setPower(0);
 
         }
-         private void intakePosition(int howMuch, double speed) {
+        /* private void intakePosition(int howMuch, double speed) {
 
             intake.getCurrentPosition();
             intake.setTargetPosition((int) (howMuch * clicksPerInch));
@@ -467,7 +475,7 @@ import java.util.ArrayList;
                 }
             }
 
-        }
+        }*/
          private void strafe(int howMuch, double speed) {
             // howMuch is in inches. A negative howMuch moves backward.
 

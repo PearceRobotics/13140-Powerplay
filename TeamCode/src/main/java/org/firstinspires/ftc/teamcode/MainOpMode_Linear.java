@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
@@ -61,6 +62,7 @@ public class MainOpMode_Linear extends LinearOpMode {
     private DcMotor frontleft = null;
     private DcMotor leftArm = null;
     private DcMotor rightArm = null;
+    private DcMotor intake = null;
 
 
     @Override
@@ -78,6 +80,7 @@ public class MainOpMode_Linear extends LinearOpMode {
         frontright = hardwareMap.get(DcMotor.class, "FrontRightWheel");
         leftArm = hardwareMap.get(DcMotor.class, "LeftArm");
         rightArm = hardwareMap.get(DcMotor.class, "RightArm");
+        intake = hardwareMap.get(DcMotor.class, "Intake");
         //magnet = hardwareMap.get(TouchSensor.class, "Magnet");
 
         // Robot wheel motor set Up ------------------------------
@@ -87,19 +90,20 @@ public class MainOpMode_Linear extends LinearOpMode {
         frontright.setDirection(DcMotor.Direction.FORWARD);
         frontleft.setDirection(DcMotor.Direction.REVERSE);
         backleft.setDirection(DcMotor.Direction.FORWARD);
+        rightArm.setDirection(DcMotor.Direction.REVERSE);
 
         // Robot Arm motor set Up ------------------------------
-        leftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftArm.setTargetPosition(0);
-        rightArm.setTargetPosition(0);
+//        leftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        rightArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        leftArm.setTargetPosition(0);
+//        rightArm.setTargetPosition(0);
 
         //telemetry.addData("Motor Position Left arm and Right arm", "Left Arm: " + leftArm.getCurrentPosition() + " Right Arm: " + rightArm.getCurrentPosition());
         //This is just for now until we read the encoder values
-        leftArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftArm.setPower(0.5);
-        rightArm.setPower(0.5);
+//        leftArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        rightArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        leftArm.setPower(1.0);
+//        rightArm.setPower(1.0);
         leftArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -111,7 +115,7 @@ public class MainOpMode_Linear extends LinearOpMode {
         double leftArmPower = 1.0;
         double rightArmPower = 1.0;
         int armPosition = 0;
-        int[] armLevel = {0 /*home*/, 50 /*Low*/, 63 /*Medium*/, 100 /*High*/};
+        int[] armLevel = {9 /*home*/, 39 /*Low*/, 58 /*Medium*/, 150 /*High*/};
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -138,17 +142,50 @@ public class MainOpMode_Linear extends LinearOpMode {
 
             // Code for mechanism to go
             // arm automation set up goes here
-            if (gamepad1.x) {
-                armPosition = armLevel[0];
-            } else if (gamepad1.a) {
-                armPosition = armLevel[1];
-            } else if (gamepad1.b) {
-                armPosition = armLevel[2];
-            } else if (gamepad1.y) {
-                armPosition = armLevel[3];
+//            if (gamepad1.x) {
+//                armPosition = armLevel[0];
+//            } else if (gamepad1.a) {
+//                armPosition = armLevel[1];
+//            } else if (gamepad1.b) {
+//                armPosition = armLevel[2];
+//            } else if (gamepad1.y) {
+//                armPosition = armLevel[3];
+//            }
+//            leftArm.setTargetPosition(armPosition);
+//            rightArm.setTargetPosition(armPosition);
+
+            if(gamepad1.left_trigger > 0.01){
+                leftArm.setPower(0.75);
+                rightArm.setPower(0.75);
             }
-            leftArm.setTargetPosition(armPosition);
-            rightArm.setTargetPosition(armPosition);
+            else if (gamepad1.right_trigger > 0.01){
+                leftArm.setPower(-0.75);
+                rightArm.setPower(-0.75);
+            }
+            else{
+                leftArm.setPower(0.0);
+                rightArm.setPower(0.0);
+            }
+
+//            if (gamepad1.right_bumper){
+//                leftArm.setPower(1.0);
+//                rightArm.setPower(1.0);}
+//            else if (gamepad1.left_bumper) {
+//                leftArm.setPower(-1.0);
+//            rightArm.setPower(-1.0);}
+//            else{
+//                leftArm.setPower(0);
+//                rightArm.setPower(0);
+//            }
+
+
+            if (gamepad1.right_bumper)
+                intake.setPower(-1.0);
+            else if (gamepad1.left_bumper)
+                intake.setPower(1.0);
+
+            else
+                intake.setPower(0.0);
 
 
             // Show the elapsed game time and wheel power, also arm position.
