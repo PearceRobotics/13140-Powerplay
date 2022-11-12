@@ -67,6 +67,7 @@ public class MainOpMode extends LinearOpMode {
     private Servo rightIntake = null;
     private TouchSensor magnet = null;
     int armPosition = 0;
+    int what;
     int[] armLevel = {9 /*home*/, 39 /*Low*/, 58 /*Medium*/, 100 /*High*/};
 
 
