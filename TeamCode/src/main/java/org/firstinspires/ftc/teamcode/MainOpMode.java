@@ -32,6 +32,9 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
@@ -48,9 +51,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name = "TestTeleop", group = "Robot code")
+@TeleOp(name = "Teleop", group = "Robot code")
 
-public class TestOpMode extends LinearOpMode {
+public class MainOpMode extends LinearOpMode {
 
     // Declare OpMode members.
     private final ElapsedTime runtime = new ElapsedTime();
@@ -60,6 +63,11 @@ public class TestOpMode extends LinearOpMode {
     private DcMotor frontleft = null;
     private DcMotor leftArm = null;
     private DcMotor rightArm = null;
+    private Servo leftIntake = null;
+    private Servo rightIntake = null;
+    private TouchSensor magnet = null;
+    int armPosition = 0;
+    int[] armLevel = {9 /*home*/, 39 /*Low*/, 58 /*Medium*/, 100 /*High*/};
 
 
     @Override
@@ -76,13 +84,47 @@ public class TestOpMode extends LinearOpMode {
         frontleft = hardwareMap.get(DcMotor.class, "FrontLeftWheel");
         frontright = hardwareMap.get(DcMotor.class, "FrontRightWheel");
 
+        // Initialize the arm and intake motors
+        leftArm = hardwareMap.get(DcMotor.class, "LeftArm");
+        rightArm = hardwareMap.get(DcMotor.class, "RightArm");
+
+
+
+        // Initialize the servos for intake
+        leftIntake = hardwareMap.get(Servo.class, "Intake");
+        rightIntake = hardwareMap.get(Servo.class, "Intake2");
+
+        // Initialize the sensors
+        magnet = hardwareMap.get(TouchSensor.class, "Magnet");
+
         // Robot wheel motor set Up ------------------------------
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        backright.setDirection(DcMotor.Direction.REVERSE);
-        frontright.setDirection(DcMotor.Direction.FORWARD);
-        frontleft.setDirection(DcMotor.Direction.REVERSE);
-        backleft.setDirection(DcMotor.Direction.FORWARD);
+        backright.setDirection(DcMotor.Direction.FORWARD);
+        frontright.setDirection(DcMotor.Direction.REVERSE);
+        frontleft.setDirection(DcMotor.Direction.FORWARD);
+        backleft.setDirection(DcMotor.Direction.REVERSE);
+
+     //    Robot Arm motor set Up ------------------------------
+        leftArm.setDirection(DcMotor.Direction.FORWARD);
+        rightArm.setDirection(DcMotor.Direction.REVERSE);
+//        leftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        rightArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        leftArm.setTargetPosition(0);
+//        rightArm.setTargetPosition(0);
+
+        //This is just for now until we read the encoder values
+//        leftArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        rightArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        leftArm.setPower(1.0);
+//        rightArm.setPower(1.0);
+//
+//        leftArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        rightArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // Robot Intake servo set Up ------------------------------
+        leftIntake.setDirection(Servo.Direction.FORWARD);
+        rightIntake.setDirection(Servo.Direction.REVERSE);
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -109,10 +151,74 @@ public class TestOpMode extends LinearOpMode {
             frontright.setPower(v2);
             frontleft.setPower(v1);
 
+
+//            if (magnet.isPressed()) {
+//                telemetry.addData("Magnet", "Arm is at home");
+//                leftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//                rightArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//                leftArm.setTargetPosition(0);
+//                rightArm.setTargetPosition(0);
+//                //This is just for now until we read the encoder values
+//                leftArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                rightArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//            } else {
+//                telemetry.addData("Magnet", "Arm is not at home");
+//            }
+
+            // Arm control
+//            // arm automation set up goes here
+//            if (gamepad1.x) {
+//                armPosition = armLevel[0];
+//            } else if (gamepad1.a) {
+//                armPosition = armLevel[1];
+//            } else if (gamepad1.b) {
+//                armPosition = armLevel[2];
+//            } else if (gamepad1.y) {
+//                armPosition = armLevel[3];
+//            }
+//            leftArm.setTargetPosition(armPosition);
+//            rightArm.setTargetPosition(armPosition);
+
+
+            if(gamepad1.left_trigger > 0.01){
+                leftArm.setPower(0.75);
+                rightArm.setPower(0.75);
+            }
+            else if (gamepad1.right_trigger > 0.01){
+                leftArm.setPower(-0.75);
+                rightArm.setPower(-0.75);
+            }
+            else{
+                leftArm.setPower(0.0);
+                rightArm.setPower(0.0);
+            }
+
+
+            // Intake controls
+            if (gamepad1.right_bumper)
+            {
+                leftIntake.setPosition(-5);
+                rightIntake.setPosition(-5);
+            }
+            else if (gamepad1.left_bumper)
+            {
+                leftIntake.setPosition(5);
+                rightIntake.setPosition(5);
+            }
+            else {
+                leftIntake.getController().pwmDisable();
+                rightIntake.getController().pwmDisable();
+            }
+
+
             // Show the elapsed game time and wheel power, also arm position.
             telemetry.addData("Motor position", String.valueOf(frontleft.getCurrentPosition()), frontright.getCurrentPosition(), backleft.getCurrentPosition(), backright.getCurrentPosition());
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "frontleft (%.2f), frontright (%.2f), backleft (%.2f), backright (%.2f)", frontleft.getPower(), frontright.getPower(), backleft.getPower(), backright.getPower());
+            telemetry.addData("Motor Position Left arm", "Left Arm: " + leftArm.getCurrentPosition());
+            telemetry.addData("Motor Position Right arm", "Right Arm: " + rightArm.getCurrentPosition());
+            telemetry.addData("Servo Position", "Left Intake: " + leftIntake.getPosition());
+            telemetry.addData("Power", "rightpower: " + rightArm.getPower() + " leftpower: " + leftArm.getPower());
             telemetry.update();
         }
     }
